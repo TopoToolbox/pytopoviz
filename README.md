@@ -1,11 +1,19 @@
 # pytopoviz
 
-`pytopoviz` is an extension package for [`pytopotoolbox`](https://github.com/TopoToolbox/pytopotoolbox) focused on creating nice 2D (`matplotlib`) and 3D (`pyvista`) figures from `pytopotoolbox` objects. This scaffold mirrors the original package structure/linting/metadata but intentionally keeps the source minimal so you can layer in visualization utilities without `libtopotoolbox`.
+`pytopoviz` is visualisation framework for crafting/using reproduciple recipes to make 2D and 3D figure from [`pytopotoolbox`](https://github.com/TopoToolbox/pytopotoolbox). 2D figures are built on top of `matplotlib`, 3D on `pyvista`.
 
-## Features (planned)
+## Features
 
-- Visualization helpers for TopoToolbox grids and streams.
-- Optional PyVista 3D support and Numba accelerations once implemented.
+- style sheets
+- automatically handles geographic extent
+- 2D composite figure object
+- 3D quick figure
+- built-in processors:
+  + conditional nan masking (e.g. removing data below elevation)
+  + hillshading, smoothing other filtering
+  + WIP
+- (WIP) per-application recipes (e.g. graphflood, slope, ...)
+- (WIP) topographic analyses processors (e.g. stream network)
 
 ## Requirements
 
@@ -34,6 +42,6 @@ pip install -e ".[test,docs]"
 - Docs use Sphinx; starter files live in `docs/`.
 - Linting follows the same `pylint` configuration used in `pytopotoolbox`.
 
-## Status
+## Authors
 
-This is a boilerplate scaffold meant to mirror the structure and metadata of `pytopotoolbox` while adding visualization-focused dependencies. Fill in the package under `pytopoviz/` with your actual implementations.
+Boris Gailleton (boris.gailleton@univ-rennes.fr)
