@@ -3,7 +3,7 @@
 __version__ = "0.0.0"
 
 from .map_object import MapObject
-from .hillshading import hillshade, multishade
+from .hillshading import hillshade, multishade, smooth_hillshade, smooth_multishade
 from .fig2d import Fig2DObject, quickmap
 from .fig3d import quickmap3d
 from .processing import (
@@ -44,6 +44,8 @@ __all__ = [
     "Fig2DObject",
     "hillshade",
     "multishade",
+    "smooth_hillshade",
+    "smooth_multishade",
     "quickmap",
     "quickmap3d",
     "apply_dark_pres_mono_style",
