@@ -1,0 +1,68 @@
+[build-system]
+build-backend = "setuptools.build_meta"
+requires = [
+    "setuptools>=61",
+    "wheel",
+]
+
+[project]
+name = "pytopoviz"
+version = "0.0.0"
+authors = [
+    {name = "TopoToolbox Contributors"},
+    {name = "Boris Gailleton", email = "boris.gailleton@univ-rennes.fr"}
+]
+description = "Visualization-focused extension to pytopotoolbox powered by matplotlib, PyVista and Numba."
+readme = "README.md"
+license = { file = "LICENSE" }
+dependencies = [
+    "topotoolbox>=0.0.7",
+    "numpy>=1.23.5",
+    "matplotlib",
+    "cmcrameri",
+    "scipy",
+    "rasterio",
+    "geopandas",
+    "shapely",
+    "clarabel",
+    "pyvista",
+    "numba"
+]
+requires-python = ">=3.10"
+keywords = ["TopoToolbox", "visualization", "PyVista"]
+classifiers = []
+
+[project.optional-dependencies]
+docs = [
+    "sphinx",
+    "sphinx_rtd_theme"
+]
+test = [
+    "pytest",
+    "pytest-cov"
+]
+
+[project.urls]
+Homepage = "https://topotoolbox.github.io"
+Repository = "https://github.com/TopoToolbox/pytopoviz"
+Issues = "https://github.com/TopoToolbox/pytopoviz/issues"
+
+[tool.setuptools]
+package-dir = {"" = "."}
+
+[tool.setuptools.packages.find]
+where = ["."]
+
+[tool.pylint]
+disable = [
+    "too-many-instance-attributes",
+    "too-many-arguments",
+    "too-many-branches",
+    "too-many-statements",
+    "too-many-locals",
+    "duplicate-code",
+    "cyclic-import",
+    "too-many-positional-arguments",
+    "too-many-lines",
+    "too-many-public-methods",
+]
