@@ -15,6 +15,7 @@ from .processing import (
 )
 from .masknan import nan_above, nan_below, nan_equal, BUILTIN_MASK_NAN
 from .shading2d import hillshade_processor, multishade_processor, BUILTIN_SHADING
+from .filter2d import gaussian_smooth, BUILTIN_FILTERS
 from .style2d import (
     apply_dark_pres_mono_style,
     apply_color_pres_style,
@@ -36,8 +37,10 @@ __all__ = [
     "nan_above",
     "hillshade_processor",
     "multishade_processor",
+    "gaussian_smooth",
     "BUILTIN_MASK_NAN",
     "BUILTIN_SHADING",
+    "BUILTIN_FILTERS",
     "Fig2DObject",
     "hillshade",
     "multishade",

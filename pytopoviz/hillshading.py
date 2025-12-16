@@ -25,13 +25,25 @@ def hillshade(
 
     NaN values from the source mapper are propagated to the hillshaded result.
     """
-    hs_grid: GridObject = mapper.grid.hillshade(
+    values = np.asarray(mapper.value, dtype=np.float32)
+    mask = np.isnan(values)
+    has_finite_values = np.isfinite(values).any()
+
+    clean_values = np.nan_to_num(values, nan=np.nanmean(mapper.grid.z))
+    import matplotlib.pyplot as plt
+    temp_grid: GridObject = mapper.grid.duplicate_with_new_data(clean_values)
+
+    hs_grid: GridObject = temp_grid.hillshade(
         azimuth=azimuth, altitude=altitude, exaggerate=exaggerate, fused=fused
     )
 
-    mask = np.isnan(mapper.value)
     shaded_values = np.array(hs_grid.z, copy=True)
-    shaded_values[mask] = np.nan
+    if mask.any():
+        if has_finite_values:
+            shaded_values[mask] = np.nan
+        else:
+            base_mask = np.isnan(np.asarray(mapper.grid.z, dtype=np.float32))
+            shaded_values[base_mask] = np.nan
 
     result = MapObject(
         hs_grid,
@@ -69,7 +81,15 @@ def multishade(
         fused=fused,
     )
 
-    averaged = np.nanmean(np.stack([shade1.value, shade2.value]), axis=0)
+    stacked = np.stack([shade1.value, shade2.value])
+    valid_counts = np.isfinite(stacked).sum(axis=0)
+    summed = np.nansum(stacked, axis=0, dtype=np.float32)
+    averaged = np.divide(
+        summed,
+        valid_counts,
+        out=np.full_like(summed, np.nan, dtype=np.float32),
+        where=valid_counts > 0,
+    )
 
     new_grid = mapper.grid.astype(np.float32)
     new_grid.z = averaged.astype(np.float32)

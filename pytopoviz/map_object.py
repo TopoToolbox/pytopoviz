@@ -58,8 +58,13 @@ class MapObject:
 
         self._value = self._prepare_value(grid.z)
 
-        self._vmin = np.nanmin(self._value) if vmin is None else vmin
-        self._vmax = np.nanmax(self._value) if vmax is None else vmax
+        if vmin is None or vmax is None:
+            auto_min, auto_max = self._nan_aware_minmax(self._value)
+            self._vmin = auto_min if vmin is None else vmin
+            self._vmax = auto_max if vmax is None else vmax
+        else:
+            self._vmin = vmin
+            self._vmax = vmax
 
     @staticmethod
     def _prepare_value(value: np.ndarray) -> np.ndarray:
@@ -67,6 +72,14 @@ class MapObject:
         val = np.array(value, dtype=np.float32, copy=True)
         val[~np.isfinite(val)] = np.nan
         return val
+
+    @staticmethod
+    def _nan_aware_minmax(arr: np.ndarray) -> tuple[float, float]:
+        """Return (min, max) ignoring NaNs; (nan, nan) if no finite values."""
+        finite_mask = np.isfinite(arr)
+        if finite_mask.any():
+            return float(np.nanmin(arr)), float(np.nanmax(arr))
+        return np.nan, np.nan
 
     @staticmethod
     def _generate_name() -> str:
@@ -127,8 +140,7 @@ class MapObject:
     @value.setter
     def value(self, value: np.ndarray) -> None:
         self._value = self._prepare_value(value)
-        self._vmin = np.nanmin(self._value)
-        self._vmax = np.nanmax(self._value)
+        self._vmin, self._vmax = self._nan_aware_minmax(self._value)
 
     @property
     def cbar(self) -> Optional[str]:

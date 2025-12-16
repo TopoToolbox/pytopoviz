@@ -19,7 +19,7 @@ def nan_equal(target: float) -> ProcessingFunction:
     return ProcessorFactory.build("nan_equal", process, recursive=True, target=target)
 
 
-def nan_below(threshold: float) -> ProcessingFunction:
+def nan_below(threshold: float=0.) -> ProcessingFunction:
     """Return processor that masks values <= threshold to NaN. Author: B.G."""
 
     def process(self: ProcessingFunction, mapper: MapObject):
@@ -29,7 +29,7 @@ def nan_below(threshold: float) -> ProcessingFunction:
     return ProcessorFactory.build("nan_below", process, recursive=True, threshold=threshold)
 
 
-def nan_above(threshold: float) -> ProcessingFunction:
+def nan_above(threshold: float=0.) -> ProcessingFunction:
     """Return processor that masks values >= threshold to NaN. Author: B.G."""
 
     def process(self: ProcessingFunction, mapper: MapObject):

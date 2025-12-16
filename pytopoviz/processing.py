@@ -45,43 +45,42 @@ def is_plottable(obj) -> bool:
 
 
 def expand_plottables(mapper: MapObject) -> list[MapObject]:
-    """Apply processors to a MapObject and collect all plottable outputs."""
-    plottables: list[MapObject] = []
-    queue: list[MapObject] = [mapper]
+    """Apply processors in-order and collect plottables depth-first."""
 
-    while queue:
-        current = queue.pop(0)
-        base_recursive = [p for p in current.processors if p.recursive]
-
+    def walk(current: MapObject) -> list[MapObject]:
+        collected: list[MapObject] = [current]
         for proc in current.processors:
-            # Each processor can mutate the current map in-place or yield new MapObjects
-            # (e.g., hillshade). Any recursive processor is propagated to produced maps.
             produced = proc(current)
+            if produced is None:
+                continue
+            produced_list: Iterable = produced if isinstance(produced, (list, tuple)) else (produced,)
+            for item in produced_list:
+                if not is_plottable(item):
+                    continue
+                collected.extend(walk(item))
+        return collected
 
-            if produced is not None:
-                produced_list: Iterable = produced if isinstance(produced, (list, tuple)) else (produced,)
-                for item in produced_list:
-                    if not is_plottable(item):
-                        continue
-                    for rp in base_recursive:
-                        if rp not in item.processors:
-                            item.processors.append(rp)
-                    queue.append(item)
-        plottables.append(current)
-
-    return plottables
+    return walk(mapper)
 
 
 class _ProcessorNamespace:
     """Namespace-style accessor for built-in processors grouped by module."""
 
     def __init__(self):
-        from . import masknan, shading2d  # local import to avoid cycles
+        from . import filter2d, masknan, shading2d  # local import to avoid cycles
 
         self.masknan = masknan
         self.shading2d = shading2d
+        self.filter2d = filter2d
+        # Convenient top-level aliases
+        self.nan_equal = masknan.nan_equal
+        self.nan_below = masknan.nan_below
+        self.nan_above = masknan.nan_above
+        self.hillshade = shading2d.hillshade_processor
+        self.multishade = shading2d.multishade_processor
+        self.gaussian_smooth = filter2d.gaussian_smooth
 
 
 # Expose a shared namespace instance
-# This enables convenient access such as tpz.processor.shading2d.multishade_processor()
+# This enables convenient access such as tpz.processor.multishade()
 processor = _ProcessorNamespace()

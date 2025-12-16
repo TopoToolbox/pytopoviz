@@ -11,6 +11,7 @@ from topotoolbox import GridObject
 from pytopoviz import Fig2DObject, MapObject, quickmap
 from pytopoviz.masknan import nan_above
 from pytopoviz.shading2d import hillshade_processor
+from pytopoviz.processing import ProcessingFunction
 
 
 def _grid_with_values(values):
@@ -100,3 +101,32 @@ def test_quickmap_applies_processors_and_collects_outputs():
     assert "gray" in cmap_names
     # colorbar only for base
     assert len(fig.axes) == 2
+
+
+def test_processors_run_in_order_and_spawned_maps_follow():
+    grid = _grid_with_values([[0, 0], [0, 0]])
+    mapper = MapObject(grid)
+
+    def add_one(_: ProcessingFunction, m: MapObject):
+        m.value = m.value + 1
+
+    def spawn_child(_: ProcessingFunction, m: MapObject):
+        child = MapObject(m.grid, cmap="gray", alpha=0.5)
+        child.value = m.value * 2
+
+        def add_five(_: ProcessingFunction, cm: MapObject):
+            cm.value = cm.value + 5
+
+        child.processors.append(ProcessingFunction("add_five", add_five, recursive=False))
+        return child
+
+    mapper.processors.append(ProcessingFunction("add_one", add_one, recursive=False))
+    mapper.processors.append(ProcessingFunction("spawn_child", spawn_child, recursive=False))
+
+    fig, ax = quickmap(mapper)
+
+    assert len(ax.images) == 2  # base then child
+    base_data = ax.images[0].get_array()
+    child_data = ax.images[1].get_array()
+    np.testing.assert_array_equal(base_data, np.ones_like(base_data))
+    np.testing.assert_array_equal(child_data, np.full_like(child_data, 7))
