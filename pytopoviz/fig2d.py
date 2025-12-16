@@ -1,4 +1,7 @@
-"""Quick matplotlib helpers for MapObject/GridObject."""
+"""Quick matplotlib helpers for MapObject/GridObject.
+
+Author: B.G.
+"""
 
 from typing import Any, Iterable, Tuple, Union
 
@@ -9,6 +12,7 @@ from topotoolbox import GridObject
 
 from .helper2d import add_colorbar, add_grid_crosses, convert_ticks_to_km, finalize_figsize
 from .map_object import MapObject
+from .processing import expand_plottables, is_plottable
 
 __all__ = ["quickmap", "Fig2DObject"]
 
@@ -49,7 +53,13 @@ class Fig2DObject:
             raise ValueError("Provide at least one MapObject or GridObject to add.")
 
         map_list: Tuple[MapObject, ...] = tuple(_ensure_map(m) for m in maps)
+        plot_list: list[MapObject] = []
         for mapper in map_list:
+            plot_list.extend(expand_plottables(mapper))
+
+        for mapper in plot_list:
+            if not is_plottable(mapper):
+                continue
             im = axis.imshow(
                 mapper.value,
                 cmap=mapper.cmap,
@@ -96,4 +106,4 @@ def quickmap(*maps: Union[MapObject, GridObject]):
     ax.set_ylabel("Northing (km)")
     convert_ticks_to_km(ax)
     add_grid_crosses(ax)
-    return fig_obj
+    return fig_obj.fig, ax

@@ -1,4 +1,7 @@
-"""Helpers to create hillshade MapObjects."""
+"""Helpers to create hillshade MapObjects.
+
+Author: B.G.
+"""
 
 from typing import Iterable, Tuple, Union
 

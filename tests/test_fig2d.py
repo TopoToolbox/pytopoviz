@@ -9,6 +9,8 @@ import numpy as np
 from topotoolbox import GridObject
 
 from pytopoviz import Fig2DObject, MapObject, quickmap
+from pytopoviz.masknan import nan_above
+from pytopoviz.shading2d import hillshade_processor
 
 
 def _grid_with_values(values):
@@ -83,3 +85,18 @@ def test_fig2d_object_ax_property_only_single_axis():
     fig_obj = Fig2DObject(nrows=1, ncols=2)
     with pytest.raises(ValueError):
         _ = fig_obj.ax
+
+
+def test_quickmap_applies_processors_and_collects_outputs():
+    grid = _grid_with_values([[1, 2], [3, 4]])
+    mapper = MapObject(grid, cbar="base")
+    mapper.processors.append(nan_above(3))
+    mapper.processors.append(hillshade_processor())
+
+    fig, ax = quickmap(mapper)
+
+    assert len(ax.images) == 2  # base + hillshade
+    cmap_names = [im.get_cmap().name for im in ax.images]
+    assert "gray" in cmap_names
+    # colorbar only for base
+    assert len(fig.axes) == 2

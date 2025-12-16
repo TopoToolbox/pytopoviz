@@ -6,6 +6,15 @@ from .map_object import MapObject
 from .hillshading import hillshade, multishade
 from .fig2d import Fig2DObject, quickmap
 from .fig3d import quickmap3d
+from .processing import (
+    ProcessorFactory,
+    ProcessingFunction,
+    expand_plottables,
+    is_plottable,
+    processor,
+)
+from .masknan import nan_above, nan_below, nan_equal, BUILTIN_MASK_NAN
+from .shading2d import hillshade_processor, multishade_processor, BUILTIN_SHADING
 from .style2d import (
     apply_dark_pres_mono_style,
     apply_color_pres_style,
@@ -17,6 +26,18 @@ from .helper2d import convert_ticks_to_km, add_grid_crosses
 
 __all__ = [
     "MapObject",
+    "ProcessingFunction",
+    "ProcessorFactory",
+    "expand_plottables",
+    "is_plottable",
+    "processor",
+    "nan_equal",
+    "nan_below",
+    "nan_above",
+    "hillshade_processor",
+    "multishade_processor",
+    "BUILTIN_MASK_NAN",
+    "BUILTIN_SHADING",
     "Fig2DObject",
     "hillshade",
     "multishade",

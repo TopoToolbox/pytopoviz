@@ -1,8 +1,11 @@
-"""Container for visualization settings tied to a GridObject."""
+"""Container for visualization settings tied to a GridObject.
+
+Author: B.G.
+"""
 
 import secrets
 import string
-from typing import Optional, Union
+from typing import List, Optional, Union
 
 import numpy as np
 from matplotlib.colors import Colormap
@@ -24,6 +27,7 @@ class MapObject:
         alpha: float = 1.0,
         cbar: Optional[str] = None,
         name: Optional[str] = None,
+        processors: Optional[list] = None,
     ) -> None:
         """
         Parameters
@@ -42,12 +46,15 @@ class MapObject:
             If a string, use it as the colorbar label when plotting.
         name : str, optional
             Identifier for this MapObject. Defaults to a random 8-character string.
+        processors : list, optional
+            ProcessingFunction instances to apply when rendering.
         """
         self._grid = grid
         self._cmap = cmap
         self._alpha = alpha
         self._cbar = cbar
         self._name = self._generate_name() if name is None else self._validate_name(name)
+        self.processors: List = list(processors) if processors is not None else []
 
         self._value = self._prepare_value(grid.z)
 
@@ -142,15 +149,3 @@ class MapObject:
         if not isinstance(other, MapObject):
             return False
         return self._name == other._name
-
-    def set_nan_equal(self, target: float) -> None:
-        """Set values equal to ``target`` to NaN."""
-        self.value[self.value == target] = np.nan
-
-    def set_nan_below(self, threshold: float) -> None:
-        """Set values less than or equal to ``threshold`` to NaN."""
-        self.value[self.value <= threshold] = np.nan
-
-    def set_nan_above(self, threshold: float) -> None:
-        """Set values greater than or equal to ``threshold`` to NaN."""
-        self.value[self.value >= threshold] = np.nan

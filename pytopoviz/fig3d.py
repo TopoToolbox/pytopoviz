@@ -1,4 +1,7 @@
-"""Quick PyVista 3D helpers for MapObject/GridObject."""
+"""Quick PyVista 3D helpers for MapObject/GridObject.
+
+Author: B.G.
+"""
 
 from typing import Tuple, Union
 
@@ -8,6 +11,7 @@ import pyvista as pv
 from topotoolbox import GridObject
 
 from .map_object import MapObject
+from .processing import expand_plottables, is_plottable
 
 __all__ = ["quickmap3d"]
 
@@ -76,13 +80,18 @@ def quickmap3d(
     if len(maps) == 0:
         raise ValueError("Provide at least one MapObject or GridObject.")
 
-    map_list = tuple(_ensure_map(m) for m in maps)
+    map_list_raw = tuple(_ensure_map(m) for m in maps)
+    map_list = []
+    for mapper in map_list_raw:
+        map_list.extend(expand_plottables(mapper))
 
     plotter = pv.Plotter()
     plotter.set_background(background)
     plotter.enable_eye_dome_lighting()
 
     for idx, mapper in enumerate(map_list):
+        if not is_plottable(mapper):
+            continue
         mesh, scalars_name = _structured_grid_from_map(mapper)
         scalar_bar_args = {}
         if isinstance(mapper.cbar, str) and show_scalar_bar:

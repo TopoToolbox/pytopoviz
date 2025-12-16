@@ -1,4 +1,7 @@
-"""Miscellaneous 2D matplotlib helpers."""
+"""Miscellaneous 2D matplotlib helpers.
+
+Author: B.G.
+"""
 
 from typing import Literal
 

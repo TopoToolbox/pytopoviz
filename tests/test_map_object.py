@@ -2,7 +2,8 @@ import numpy as np
 
 from topotoolbox import GridObject
 
-from pytopoviz import MapObject
+from pytopoviz import MapObject, expand_plottables
+from pytopoviz.masknan import nan_above, nan_below
 
 
 def test_map_object_defaults_and_nan_handling():
@@ -21,19 +22,34 @@ def test_map_object_defaults_and_nan_handling():
     assert np.isnan(mapper.value[1, 0])
 
 
-def test_set_nan_filters():
+def test_set_nan_filters_via_processor():
     grid = GridObject()
     grid.z = np.array([[0.0, 5.0], [10.0, 15.0]])
 
     mapper = MapObject(grid)
-    mapper.set_nan_equal(5.0)
-    mapper.set_nan_below(2.5)
-    mapper.set_nan_above(12.5)
+    processor = nan_below(2.5)
+    mapper.processors.append(processor)
+    mapper.value[mapper.value == 5.0] = np.nan
 
-    assert np.isnan(mapper.value[0, 0])
-    assert np.isnan(mapper.value[0, 1])
-    assert np.isnan(mapper.value[1, 1])
-    assert mapper.value[1, 0] == np.float32(10.0)
+    processed = expand_plottables(mapper)[0]
+
+    assert np.isnan(processed.value[0, 0])
+    assert np.isnan(processed.value[0, 1])
+    assert np.isnan(processed.value[1, 1])
+    assert processed.value[1, 0] == np.float32(10.0)
+
+
+def test_processor_params_are_editable():
+    grid = GridObject()
+    grid.z = np.array([[1.0, 2.0]])
+
+    mapper = MapObject(grid)
+    proc = nan_above(5.0)
+    proc.threshold = 1.5  # adjust after creation
+    mapper.processors.append(proc)
+
+    processed = expand_plottables(mapper)[0]
+    assert np.isnan(processed.value[0, 1])
 
 
 def test_getters_setters_refresh_values():
