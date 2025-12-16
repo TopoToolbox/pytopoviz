@@ -1,0 +1,12 @@
+topotoolbox>=0.0.7
+numpy>=1.23.5
+matplotlib
+cmcrameri
+scipy
+rasterio
+geopandas
+shapely
+clarabel
+pyvista
+numba
+pytest
