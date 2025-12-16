@@ -1,5 +1,7 @@
 """Container for visualization settings tied to a GridObject."""
 
+import secrets
+import string
 from typing import Optional, Union
 
 import numpy as np
@@ -21,6 +23,7 @@ class MapObject:
         vmax: Optional[float] = None,
         alpha: float = 1.0,
         cbar: Optional[str] = None,
+        name: Optional[str] = None,
     ) -> None:
         """
         Parameters
@@ -37,11 +40,14 @@ class MapObject:
             Transparency value in [0, 1]. Defaults to 1.0 (opaque).
         cbar : str or None, optional
             If a string, use it as the colorbar label when plotting.
+        name : str, optional
+            Identifier for this MapObject. Defaults to a random 8-character string.
         """
         self._grid = grid
         self._cmap = cmap
         self._alpha = alpha
         self._cbar = cbar
+        self._name = self._generate_name() if name is None else self._validate_name(name)
 
         self._value = self._prepare_value(grid.z)
 
@@ -54,6 +60,17 @@ class MapObject:
         val = np.array(value, dtype=np.float32, copy=True)
         val[~np.isfinite(val)] = np.nan
         return val
+
+    @staticmethod
+    def _generate_name() -> str:
+        alphabet = string.ascii_letters + string.digits
+        return "".join(secrets.choice(alphabet) for _ in range(8))
+
+    @staticmethod
+    def _validate_name(name: str) -> str:
+        if not isinstance(name, str) or not name:
+            raise ValueError("MapObject name must be a non-empty string.")
+        return name
 
     @property
     def grid(self) -> GridObject:
@@ -113,6 +130,18 @@ class MapObject:
     @cbar.setter
     def cbar(self, label: Optional[str]) -> None:
         self._cbar = label
+
+    @property
+    def name(self) -> str:
+        return self._name
+
+    def __hash__(self) -> int:
+        return hash(self._name)
+
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, MapObject):
+            return False
+        return self._name == other._name
 
     def set_nan_equal(self, target: float) -> None:
         """Set values equal to ``target`` to NaN."""

@@ -62,3 +62,15 @@ def test_getters_setters_refresh_values():
     assert mapper.grid is new_grid
     assert mapper.vmin == 5.0
     assert mapper.vmax == 6.0
+
+
+def test_map_object_name_and_hashability():
+    grid = GridObject()
+    grid.z = np.array([[1.0]])
+
+    mapper = MapObject(grid)
+    assert isinstance(mapper.name, str)
+    assert len(mapper.name) == 8
+
+    store = {mapper: "stored"}
+    assert store[mapper] == "stored"

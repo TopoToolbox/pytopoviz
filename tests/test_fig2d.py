@@ -3,11 +3,12 @@ import matplotlib
 # Use non-interactive backend for tests
 matplotlib.use("Agg")
 
+import pytest
 import numpy as np
 
 from topotoolbox import GridObject
 
-from pytopoviz import MapObject, quickmap
+from pytopoviz import Fig2DObject, MapObject, quickmap
 
 
 def _grid_with_values(values):
@@ -64,3 +65,21 @@ def test_quickmap_labels_ticks_and_crosses():
 
     # Cross markers added
     assert len(ax.lines) > 0
+
+
+def test_fig2d_object_adds_and_tracks_maps():
+    grid = _grid_with_values([[1, 2], [3, 4]])
+    mapper = MapObject(grid, cbar="cb")
+
+    fig_obj = Fig2DObject(figsize=(2, 2))
+    fig_obj.add_maps(fig_obj.ax, mapper)
+
+    assert mapper in fig_obj.images
+    assert mapper in fig_obj.colorbars
+    assert fig_obj.colorbars[mapper].ax.get_ylabel() == "cb"
+
+
+def test_fig2d_object_ax_property_only_single_axis():
+    fig_obj = Fig2DObject(nrows=1, ncols=2)
+    with pytest.raises(ValueError):
+        _ = fig_obj.ax
