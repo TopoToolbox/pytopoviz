@@ -20,7 +20,7 @@ dem = ttb.load_dem("bigtujunga")
 elevation = tpz.MapObject(dem, cmap=cm.batlowW, cbar="Elevation (m)")
 # Instantiate processor, tweak parameters, then attach
 shade_proc = tpz.processor.shading2d.multishade_processor()
-shade_proc.azimuths = (280.0, 160.0)
+shade_proc.azimuths = (280.0, 75.0)
 elevation.processors.append(shade_proc)
 # elevation.processors.append(tpz.hillshade_processor())
 

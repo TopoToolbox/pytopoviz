@@ -83,6 +83,7 @@ def quickmap3d(
     map_list_raw = tuple(_ensure_map(m) for m in maps)
     map_list = []
     for mapper in map_list_raw:
+        # Apply processors so secondary layers (e.g., hillshade) are included.
         map_list.extend(expand_plottables(mapper))
 
     plotter = pv.Plotter()

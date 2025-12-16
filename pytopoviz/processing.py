@@ -54,6 +54,8 @@ def expand_plottables(mapper: MapObject) -> list[MapObject]:
         base_recursive = [p for p in current.processors if p.recursive]
 
         for proc in current.processors:
+            # Each processor can mutate the current map in-place or yield new MapObjects
+            # (e.g., hillshade). Any recursive processor is propagated to produced maps.
             produced = proc(current)
 
             if produced is not None:
@@ -81,4 +83,5 @@ class _ProcessorNamespace:
 
 
 # Expose a shared namespace instance
+# This enables convenient access such as tpz.processor.shading2d.multishade_processor()
 processor = _ProcessorNamespace()

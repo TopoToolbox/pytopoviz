@@ -55,6 +55,7 @@ class Fig2DObject:
         map_list: Tuple[MapObject, ...] = tuple(_ensure_map(m) for m in maps)
         plot_list: list[MapObject] = []
         for mapper in map_list:
+            # Expand processors so derived layers (e.g., hillshade) get plotted too.
             plot_list.extend(expand_plottables(mapper))
 
         for mapper in plot_list:
