@@ -28,6 +28,7 @@ class MapObject:
         cbar: Optional[str] = None,
         name: Optional[str] = None,
         processors: Optional[list] = None,
+        draped: bool = False,
     ) -> None:
         """
         Parameters
@@ -48,6 +49,8 @@ class MapObject:
             Identifier for this MapObject. Defaults to a random 8-character string.
         processors : list, optional
             ProcessingFunction instances to apply when rendering.
+        draped : bool, optional
+            If True, use the parent surface geometry in 3D and only affect color.
         """
         self._grid = grid
         self._cmap = cmap
@@ -55,6 +58,8 @@ class MapObject:
         self._cbar = cbar
         self._name = self._generate_name() if name is None else self._validate_name(name)
         self.processors: List = list(processors) if processors is not None else []
+        self._draped = bool(draped)
+        self._z_scale_factor = 1.0
 
         self._value = self._prepare_value(grid.z)
 
@@ -153,6 +158,22 @@ class MapObject:
     @property
     def name(self) -> str:
         return self._name
+
+    @property
+    def draped(self) -> bool:
+        return self._draped
+
+    @draped.setter
+    def draped(self, draped: bool) -> None:
+        self._draped = bool(draped)
+
+    @property
+    def z_scale_factor(self) -> float:
+        return self._z_scale_factor
+
+    @z_scale_factor.setter
+    def z_scale_factor(self, value: float) -> None:
+        self._z_scale_factor = float(value)
 
     def __hash__(self) -> int:
         return hash(self._name)

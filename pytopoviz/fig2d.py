@@ -56,7 +56,7 @@ class Fig2DObject:
         plot_list: list[MapObject] = []
         for mapper in map_list:
             # Expand processors so derived layers (e.g., hillshade) get plotted too.
-            plot_list.extend(expand_plottables(mapper))
+            plot_list.extend(expand_plottables(mapper, mode="2d"))
 
         for mapper in plot_list:
             if not is_plottable(mapper):

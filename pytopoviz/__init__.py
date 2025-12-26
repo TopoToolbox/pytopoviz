@@ -5,13 +5,21 @@ __version__ = "0.0.0"
 from .map_object import MapObject
 from .hillshading import hillshade, multishade, smooth_hillshade, smooth_multishade
 from .fig2d import Fig2DObject, quickmap
-from .fig3d import quickmap3d
+from .fig3d import quickmap3d, Fig3DObject
 from .processing import (
     ProcessorFactory,
     ProcessingFunction,
     expand_plottables,
     is_plottable,
     processor,
+)
+from .helper3d import (
+    scale,
+    double_scale,
+    halve_scale,
+    tenfold,
+    tenthfold,
+    BUILTIN_3D,
 )
 from .masknan import nan_above, nan_below, nan_equal, BUILTIN_MASK_NAN
 from .shading2d import hillshade_processor, multishade_processor, BUILTIN_SHADING
@@ -32,6 +40,11 @@ __all__ = [
     "expand_plottables",
     "is_plottable",
     "processor",
+    "scale",
+    "double_scale",
+    "halve_scale",
+    "tenfold",
+    "tenthfold",
     "nan_equal",
     "nan_below",
     "nan_above",
@@ -41,7 +54,9 @@ __all__ = [
     "BUILTIN_MASK_NAN",
     "BUILTIN_SHADING",
     "BUILTIN_FILTERS",
+    "BUILTIN_3D",
     "Fig2DObject",
+    "Fig3DObject",
     "hillshade",
     "multishade",
     "smooth_hillshade",

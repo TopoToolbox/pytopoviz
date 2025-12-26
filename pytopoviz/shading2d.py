@@ -15,6 +15,7 @@ def hillshade_processor(
     altitude: float = 50.0,
     exaggerate: float = 1.0,
     fused: bool = True,
+    alpha: float = 0.45,
 ) -> ProcessingFunction:
     """Return processor generating a hillshade MapObject. Author: B.G."""
 
@@ -25,6 +26,7 @@ def hillshade_processor(
             altitude=self.altitude,
             exaggerate=self.exaggerate,
             fused=self.fused,
+            alpha=self.alpha,
         )
 
     return ProcessorFactory.build(
@@ -35,6 +37,7 @@ def hillshade_processor(
         altitude=altitude,
         exaggerate=exaggerate,
         fused=fused,
+        alpha=alpha,
     )
 
 
@@ -43,6 +46,7 @@ def multishade_processor(
     altitude: float = 50.0,
     exaggerate: float = 1.0,
     fused: bool = True,
+    alpha: float = 0.45,
 ) -> ProcessingFunction:
     """Return processor generating averaged dual-azimuth hillshade. Author: B.G."""
 
@@ -53,6 +57,7 @@ def multishade_processor(
             altitude=self.altitude,
             exaggerate=self.exaggerate,
             fused=self.fused,
+            alpha=self.alpha,
         )
 
     return ProcessorFactory.build(
@@ -63,6 +68,7 @@ def multishade_processor(
         altitude=altitude,
         exaggerate=exaggerate,
         fused=fused,
+        alpha=alpha,
     )
 
 
@@ -70,4 +76,3 @@ BUILTIN_SHADING = {
     "hillshade": hillshade_processor,
     "multishade": multishade_processor,
 }
-

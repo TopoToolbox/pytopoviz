@@ -38,6 +38,7 @@ def _hillshade_from_values(
     altitude: float,
     exaggerate: float,
     fused: bool,
+    alpha: float,
 ) -> MapObject:
     values = np.asarray(values, dtype=np.float32)
     mask = np.isnan(values)
@@ -65,8 +66,9 @@ def _hillshade_from_values(
     result = MapObject(
         hs_grid,
         cmap='gray',
-        alpha=0.45,
+        alpha=alpha,
     )
+    result.draped = True
     result.value = shaded_values
     return result
 
@@ -77,6 +79,7 @@ def hillshade(
     altitude: float = 50.0,
     exaggerate: float = 1.0,
     fused: bool = True,
+    alpha: float = 0.45,
 ) -> MapObject:
     """Return a MapObject with the hillshade of the mapper's grid.
 
@@ -89,6 +92,7 @@ def hillshade(
         altitude=altitude,
         exaggerate=exaggerate,
         fused=fused,
+        alpha=alpha,
     )
 
 
@@ -100,6 +104,7 @@ def smooth_hillshade(
     altitude: float = 50.0,
     exaggerate: float = 1.0,
     fused: bool = True,
+    alpha: float = 0.45,
 ) -> MapObject:
     """Return hillshade computed on a Gaussian-smoothed copy of mapper values."""
     smoothed = _nan_gaussian_smooth(mapper.value, sigma=sigma, mode=mode)
@@ -110,6 +115,7 @@ def smooth_hillshade(
         altitude=altitude,
         exaggerate=exaggerate,
         fused=fused,
+        alpha=alpha,
     )
 
 
@@ -119,6 +125,7 @@ def multishade(
     altitude: float = 50.0,
     exaggerate: float = 1.0,
     fused: bool = True,
+    alpha: float = 0.45,
 ) -> MapObject:
     """Average two hillshades from different azimuths."""
     azimuth_list = tuple(azimuths)
@@ -156,8 +163,9 @@ def multishade(
     result = MapObject(
         new_grid,
         cmap='gray',
-        alpha=0.45,
+        alpha=alpha,
     )
+    result.draped = True
     result.value = averaged
     return result
 
@@ -170,6 +178,7 @@ def smooth_multishade(
     altitude: float = 50.0,
     exaggerate: float = 1.0,
     fused: bool = True,
+    alpha: float = 0.45,
 ) -> MapObject:
     """Average two hillshades computed on a Gaussian-smoothed copy."""
     smoother = partial(smooth_hillshade, sigma=sigma, mode=mode)
@@ -184,6 +193,7 @@ def smooth_multishade(
         altitude=altitude,
         exaggerate=exaggerate,
         fused=fused,
+        alpha=alpha,
     )
     shade2 = smoother(
         mapper,
@@ -191,6 +201,7 @@ def smooth_multishade(
         altitude=altitude,
         exaggerate=exaggerate,
         fused=fused,
+        alpha=alpha,
     )
 
     stacked = np.stack([shade1.value, shade2.value])
@@ -209,7 +220,8 @@ def smooth_multishade(
     result = MapObject(
         new_grid,
         cmap='gray',
-        alpha=0.45,
+        alpha=alpha,
     )
+    result.draped = True
     result.value = averaged
     return result
