@@ -1,10 +1,10 @@
 """Example figure with topography and multi-directional hillshade overlay."""
 
-import matplotlib.pyplot as plt
 import topotoolbox as ttb
 from cmcrameri import cm
 
 import pytopoviz as tpz
+from pytopoviz.helper2d import add_grid_crosses, convert_ticks_to_km, finalize_figsize
 
 # Apply the dark presentation style before plotting
 # tpz.set_style('paper')
@@ -14,10 +14,11 @@ tpz.set_style('dark_pres_mono')
 
 # Load the sample DEM
 dem = ttb.load_dem("bigtujunga")
+dem.name = "Elevation"
 
 # Build the elevation MapObject and attach processors
 # - multishade_processor() will create and return a shaded MapObject
-elevation = tpz.MapObject(dem, cmap=cm.batlowW, cbar="Elevation (m)")
+elevation = tpz.MapObject(dem, cmap=cm.batlowW, cbar="Elevation (m)", name = "DEM")
 nan_proc = tpz.processor.nan_below()
 nan_proc.threshold = 500
 elevation.processors.append(nan_proc)
@@ -37,7 +38,19 @@ elevation.processors.append(shade_proc)
 # elevation.processors.append(tpz.hillshade_processor())
 
 # Plot elevation; processor automatically adds the hillshade to the same axis
-fig, ax = tpz.quickmap(elevation)
+figsize = finalize_figsize([elevation])
+fig_obj = tpz.Fig2DObject(figsize=figsize, constrained_layout=True, layout=None)
+fig_obj.fig.set_constrained_layout_pads(w_pad=0.05, h_pad=0.05, wspace=0.02, hspace=0.02)
+ax = fig_obj.ax
+fig_obj.add_maps(ax, elevation)
 ax.set_title("Bigtujunga DEM")
+ax.set_xlabel("Easting (km)")
+ax.set_ylabel("Northing (km)")
+convert_ticks_to_km(ax)
+add_grid_crosses(ax)
+fig_obj.fig.show()
 
-plt.show()
+workflow = tpz.workflow_from_fig2d(fig_obj)
+workflow.to_file("workflow_fig2d_t1.json")
+print("Workflow saved to workflow_fig2d_t1.json")
+print("Run with: pytopoviz-run workflow_fig2d_t1.json")

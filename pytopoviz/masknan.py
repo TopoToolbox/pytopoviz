@@ -38,10 +38,22 @@ def nan_above(threshold: float=0.) -> ProcessingFunction:
 
     return ProcessorFactory.build("nan_above", process, recursive=True, threshold=threshold)
 
+def nan_mask(mask: np.ndarray) -> ProcessingFunction:
+    """Return processor that masks values using a 2D boolean/int mask. Author: B.G."""
+
+    def process(self: ProcessingFunction, mapper: MapObject):
+        mask_arr = np.asarray(self.mask)
+        if mask_arr.shape != mapper.value.shape:
+            raise ValueError("nan_mask expects a mask with the same shape as mapper values.")
+        mapper.value[mask_arr.astype(bool)] = np.nan
+        return None
+
+    return ProcessorFactory.build("nan_mask", process, recursive=True, mask=mask)
+
 
 BUILTIN_MASK_NAN = {
     "nan_equal": nan_equal,
     "nan_below": nan_below,
     "nan_above": nan_above,
+    "nan_mask": nan_mask,
 }
-

@@ -19,9 +19,23 @@ from .helper3d import (
     halve_scale,
     tenfold,
     tenthfold,
+    lighting_control,
+    matte_lighting,
+    glossy_lighting,
+    flat_lighting,
+    dramatic_lighting,
+    heightmap_lighting,
+    lighting_intensity_up,
+    lighting_intensity_down,
+    lighting_brighten,
+    lighting_darken,
+    light_rotate_left,
+    light_rotate_right,
+    light_raise,
+    light_lower,
     BUILTIN_3D,
 )
-from .masknan import nan_above, nan_below, nan_equal, BUILTIN_MASK_NAN
+from .masknan import nan_above, nan_below, nan_equal, nan_mask, BUILTIN_MASK_NAN
 from .shading2d import hillshade_processor, multishade_processor, BUILTIN_SHADING
 from .filter2d import gaussian_smooth, BUILTIN_FILTERS
 from .style2d import (
@@ -30,8 +44,10 @@ from .style2d import (
     apply_paper_style,
     apply_bw_paper_style,
     set_style,
+    get_style,
 )
 from .helper2d import convert_ticks_to_km, add_grid_crosses
+from .workflow import Workflow, workflow_from_fig2d, workflow_from_fig3d
 
 __all__ = [
     "MapObject",
@@ -45,9 +61,24 @@ __all__ = [
     "halve_scale",
     "tenfold",
     "tenthfold",
+    "lighting_control",
+    "matte_lighting",
+    "glossy_lighting",
+    "flat_lighting",
+    "dramatic_lighting",
+    "heightmap_lighting",
+    "lighting_intensity_up",
+    "lighting_intensity_down",
+    "lighting_brighten",
+    "lighting_darken",
+    "light_rotate_left",
+    "light_rotate_right",
+    "light_raise",
+    "light_lower",
     "nan_equal",
     "nan_below",
     "nan_above",
+    "nan_mask",
     "hillshade_processor",
     "multishade_processor",
     "gaussian_smooth",
@@ -68,7 +99,11 @@ __all__ = [
     "apply_paper_style",
     "apply_bw_paper_style",
     "set_style",
+    "get_style",
     "convert_ticks_to_km",
     "add_grid_crosses",
+    "Workflow",
+    "workflow_from_fig2d",
+    "workflow_from_fig3d",
     "__version__",
 ]

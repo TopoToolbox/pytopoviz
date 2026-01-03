@@ -15,6 +15,30 @@
 - (WIP) per-application recipes (e.g. graphflood, slope, ...)
 - (WIP) topographic analyses processors (e.g. stream network)
 
+## Processors
+
+Processors are small, composable steps attached to a `MapObject` that run in order before plotting. They can modify the map values in place (e.g. smoothing, masking) or spawn derived layers (e.g. hillshade). This lets you build repeatable visual recipes where the same source data produces multiple stacked outputs in 2D or 3D. Processors can also be flagged as 2D- or 3D-only so they are ignored in the other context.
+
+### Masking
+
+- `nan_below`, `nan_above`, `nan_equal` (conditional NaN masking)
+
+### Shading
+
+- `hillshade`, `multishade` (and smooth variants via `smooth_hillshade`, `smooth_multishade`)
+
+### Filtering
+
+- `gaussian_smooth`
+
+### 3D helpers
+
+- `scale`, `double_scale`, `halve_scale`, `tenfold`, `tenthfold`
+- `lighting_control`
+- `matte_lighting`, `glossy_lighting`, `flat_lighting`, `dramatic_lighting`
+- `lighting_intensity_up`, `lighting_intensity_down`, `lighting_brighten`, `lighting_darken`
+- `light_rotate_left`, `light_rotate_right`, `light_raise`, `light_lower`
+
 ## Requirements
 
 - Python >= 3.10

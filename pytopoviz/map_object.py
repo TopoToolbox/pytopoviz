@@ -29,6 +29,15 @@ class MapObject:
         name: Optional[str] = None,
         processors: Optional[list] = None,
         draped: bool = False,
+        ambient: float = 0.15,
+        diffuse: float = 0.8,
+        specular: float = 0.1,
+        specular_power: float = 10.0,
+        smooth_shading: Optional[bool] = None,
+        eye_dome_lighting: Optional[bool] = None,
+        light_azimuth: Optional[float] = None,
+        light_elevation: Optional[float] = None,
+        light_intensity: Optional[float] = None,
     ) -> None:
         """
         Parameters
@@ -51,6 +60,24 @@ class MapObject:
             ProcessingFunction instances to apply when rendering.
         draped : bool, optional
             If True, use the parent surface geometry in 3D and only affect color.
+        ambient : float, optional
+            3D lighting ambient component.
+        diffuse : float, optional
+            3D lighting diffuse component.
+        specular : float, optional
+            3D lighting specular component.
+        specular_power : float, optional
+            3D lighting specular exponent.
+        smooth_shading : bool or None, optional
+            Override smooth shading for 3D rendering when set.
+        eye_dome_lighting : bool or None, optional
+            Override eye dome lighting for 3D rendering when set.
+        light_azimuth : float or None, optional
+            Scene light azimuth override (degrees).
+        light_elevation : float or None, optional
+            Scene light elevation override (degrees).
+        light_intensity : float or None, optional
+            Scene light intensity override.
         """
         self._grid = grid
         self._cmap = cmap
@@ -60,6 +87,15 @@ class MapObject:
         self.processors: List = list(processors) if processors is not None else []
         self._draped = bool(draped)
         self._z_scale_factor = 1.0
+        self._ambient = float(ambient)
+        self._diffuse = float(diffuse)
+        self._specular = float(specular)
+        self._specular_power = float(specular_power)
+        self._smooth_shading = smooth_shading
+        self._eye_dome_lighting = eye_dome_lighting
+        self._light_azimuth = light_azimuth
+        self._light_elevation = light_elevation
+        self._light_intensity = light_intensity
 
         self._value = self._prepare_value(grid.z)
 
@@ -174,6 +210,78 @@ class MapObject:
     @z_scale_factor.setter
     def z_scale_factor(self, value: float) -> None:
         self._z_scale_factor = float(value)
+
+    @property
+    def ambient(self) -> float:
+        return self._ambient
+
+    @ambient.setter
+    def ambient(self, value: float) -> None:
+        self._ambient = max(0.0, min(1.0, float(value)))
+
+    @property
+    def diffuse(self) -> float:
+        return self._diffuse
+
+    @diffuse.setter
+    def diffuse(self, value: float) -> None:
+        self._diffuse = max(0.0, min(1.0, float(value)))
+
+    @property
+    def specular(self) -> float:
+        return self._specular
+
+    @specular.setter
+    def specular(self, value: float) -> None:
+        self._specular = max(0.0, min(1.0, float(value)))
+
+    @property
+    def specular_power(self) -> float:
+        return self._specular_power
+
+    @specular_power.setter
+    def specular_power(self, value: float) -> None:
+        self._specular_power = max(0.0, float(value))
+
+    @property
+    def smooth_shading(self) -> Optional[bool]:
+        return self._smooth_shading
+
+    @smooth_shading.setter
+    def smooth_shading(self, value: Optional[bool]) -> None:
+        self._smooth_shading = None if value is None else bool(value)
+
+    @property
+    def eye_dome_lighting(self) -> Optional[bool]:
+        return self._eye_dome_lighting
+
+    @eye_dome_lighting.setter
+    def eye_dome_lighting(self, value: Optional[bool]) -> None:
+        self._eye_dome_lighting = None if value is None else bool(value)
+
+    @property
+    def light_azimuth(self) -> Optional[float]:
+        return self._light_azimuth
+
+    @light_azimuth.setter
+    def light_azimuth(self, value: Optional[float]) -> None:
+        self._light_azimuth = None if value is None else float(value)
+
+    @property
+    def light_elevation(self) -> Optional[float]:
+        return self._light_elevation
+
+    @light_elevation.setter
+    def light_elevation(self, value: Optional[float]) -> None:
+        self._light_elevation = None if value is None else float(value)
+
+    @property
+    def light_intensity(self) -> Optional[float]:
+        return self._light_intensity
+
+    @light_intensity.setter
+    def light_intensity(self, value: Optional[float]) -> None:
+        self._light_intensity = None if value is None else float(value)
 
     def __hash__(self) -> int:
         return hash(self._name)

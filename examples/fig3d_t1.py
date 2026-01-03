@@ -30,4 +30,9 @@ fig = tpz.Fig3DObject(
     # z_exaggeration=1.,
 )
 fig.add_maps(elevation)
-fig.show(screenshot_path="scene.png", auto_close=False)
+fig.show(screenshot_path="scene.png", auto_close=True)
+
+workflow = tpz.workflow_from_fig3d(fig)
+workflow.to_file("workflow_fig3d_t1.json")
+print("Workflow saved to workflow_fig3d_t1.json")
+print("Run with: pytopoviz-run workflow_fig3d_t1.json")

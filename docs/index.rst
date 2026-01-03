@@ -11,6 +11,8 @@ this extension does not rely on ``libtopotoolbox``.
    :caption: Contents
 
    README
+   processors
+   workflows
 
 Indices and tables
 ==================

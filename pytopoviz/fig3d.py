@@ -90,17 +90,24 @@ class Fig3DObject:
         self.z_exaggeration = None if z_exaggeration is None else float(z_exaggeration)
 
         self.meshes: Dict[MapObject, pv.Actor] = {}
+        self._light: pv.Light | None = None
+        self._light_added = False
+        self._pending_camera_position = None
+        self.base_maps: list[MapObject] = []
 
-    def add_maps(self, *maps: Union[MapObject, GridObject]):
+    def add_maps(self, *maps: Union[MapObject, GridObject], surface_map: Union[MapObject, GridObject, None] = None):
         """Add MapObjects to the plotter after applying processors in order."""
         if not maps:
             raise ValueError("Provide at least one MapObject or GridObject to add.")
 
         map_list_raw = tuple(_ensure_map(m) for m in maps)
+        self.base_maps.extend(map_list_raw)
         plot_list: list[tuple[MapObject, MapObject]] = []
+        surface_map_override = _ensure_map(surface_map) if surface_map is not None else None
+        default_surface = surface_map_override if surface_map_override is not None else map_list_raw[0]
 
-        def collect(current: MapObject, base_surface: MapObject):
-            surface_map = base_surface if current.draped else current
+        def collect(current: MapObject, inherited_surface: MapObject):
+            surface_map = inherited_surface if current.draped else current
             plot_list.append((current, surface_map))
             for proc in current.processors:
                 if not _processor_is_compatible(proc, "3d"):
@@ -109,15 +116,42 @@ class Fig3DObject:
                 if produced is None:
                     continue
                 produced_list: Iterable = produced if isinstance(produced, (list, tuple)) else (produced,)
+                if surface_map_override is not None:
+                    next_inherited = surface_map_override
+                else:
+                    next_inherited = current if not current.draped else inherited_surface
                 for item in produced_list:
                     if not is_plottable(item):
                         continue
-                    collect(item, surface_map)
+                    collect(item, next_inherited)
 
         for mapper in map_list_raw:
-            collect(mapper, mapper)
+            collect(mapper, default_surface)
 
         for idx, (mapper, surface_map) in enumerate(plot_list):
+            if mapper.eye_dome_lighting is not None:
+                if mapper.eye_dome_lighting:
+                    self.plotter.enable_eye_dome_lighting()
+                else:
+                    self.plotter.disable_eye_dome_lighting()
+
+            if (
+                mapper.light_azimuth is not None
+                or mapper.light_elevation is not None
+                or mapper.light_intensity is not None
+            ):
+                if self._light is None:
+                    self._light = pv.Light()
+                    self._light.set_scene_light()
+                azim = mapper.light_azimuth if mapper.light_azimuth is not None else 315.0
+                elev = mapper.light_elevation if mapper.light_elevation is not None else 45.0
+                self._light.set_direction_angle(elev, azim)
+                if mapper.light_intensity is not None:
+                    self._light.intensity = mapper.light_intensity
+                if not self._light_added:
+                    self.plotter.add_light(self._light)
+                    self._light_added = True
+
             mesh, scalars_name = _structured_grid_from_map(
                 mapper,
                 surface_map,
@@ -136,26 +170,63 @@ class Fig3DObject:
                 clim=(mapper.vmin, mapper.vmax),
                 opacity=mapper.alpha,
                 nan_opacity=0.0,
-                smooth_shading=self.smooth_shading,
+                smooth_shading=self.smooth_shading
+                if mapper.smooth_shading is None
+                else mapper.smooth_shading,
                 show_scalar_bar=bool(scalar_bar_args.get("title")),
                 scalar_bar_args=scalar_bar_args,
                 name=f"map_{idx}",
-                ambient=0.15,
-                diffuse=0.8,
-                specular=0.1,
-                specular_power=10,
+                ambient=mapper.ambient,
+                diffuse=mapper.diffuse,
+                specular=mapper.specular,
+                specular_power=mapper.specular_power,
             )
             self.meshes[mapper] = actor
+        if self._pending_camera_position is not None:
+            self.plotter.camera_position = self._pending_camera_position
         return self.plotter
 
-    def show(self, screenshot_path: str = "quickmap3d.png", auto_close: bool = False):
+    def set_camera_position(self, camera_position):
+        """Set the camera position tuple (position, focal point, view up)."""
+        self._pending_camera_position = camera_position
+        self.plotter.camera_position = camera_position
+
+    def show(
+        self,
+        screenshot_path: str = "quickmap3d.png",
+        auto_close: bool = False,
+        print_camera: bool = True,
+    ):
         """Render the scene, optionally save a screenshot, and return camera position."""
-        cpos = self.plotter.show(auto_close=auto_close)
+        reset_camera = True
+        if self._pending_camera_position is not None:
+            self.plotter.camera_position = self._pending_camera_position
+            reset_camera = False
+        elif reset_camera:
+            self.plotter.reset_camera()
+        try:
+            cpos = self.plotter.show(auto_close=auto_close, reset_camera=reset_camera)
+        except TypeError:
+            cpos = self.plotter.show(auto_close=auto_close)
+        if cpos is None:
+            cpos = self.plotter.camera_position
+        if print_camera:
+            print(f"camera_position={cpos}")
         if screenshot_path:
             self.plotter.screenshot(screenshot_path)
         if auto_close:
             self.plotter.close()
         return cpos
+
+    def save(self, screenshot_path: str = "quickmap3d.png", transparent_background: bool = False):
+        """Render off-screen and save a screenshot without showing a window."""
+        was_off_screen = self.plotter.off_screen
+        self.plotter.off_screen = True
+        if self._pending_camera_position is not None:
+            self.plotter.camera_position = self._pending_camera_position
+        self.plotter.render()
+        self.plotter.screenshot(screenshot_path, transparent_background=transparent_background)
+        self.plotter.off_screen = was_off_screen
 
 
 def quickmap3d(
@@ -165,6 +236,9 @@ def quickmap3d(
     smooth_shading: bool = True,
     show_scalar_bar: bool = True,
     z_exaggeration: float | None = None,
+    camera_position=None,
+    print_camera: bool = True,
+    surface_map: Union[MapObject, GridObject, None] = None,
 ):
     """Display one or more MapObjects in 3D with PyVista and save a screenshot."""
     if len(maps) == 0:
@@ -176,5 +250,7 @@ def quickmap3d(
         show_scalar_bar=show_scalar_bar,
         z_exaggeration=z_exaggeration,
     )
-    fig.add_maps(*maps)
-    return fig.show(screenshot_path=screenshot_path, auto_close=False)
+    if camera_position is not None:
+        fig.set_camera_position(camera_position)
+    fig.add_maps(*maps, surface_map=surface_map)
+    return fig.show(screenshot_path=screenshot_path, auto_close=False, print_camera=print_camera)

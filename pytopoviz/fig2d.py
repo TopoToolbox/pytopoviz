@@ -36,6 +36,7 @@ class Fig2DObject:
         self.axes = axes_list
         self.images: dict[MapObject, Any] = {}
         self.colorbars: dict[MapObject, Any] = {}
+        self.base_maps: list[MapObject] = []
 
     @property
     def ax(self):
@@ -53,6 +54,7 @@ class Fig2DObject:
             raise ValueError("Provide at least one MapObject or GridObject to add.")
 
         map_list: Tuple[MapObject, ...] = tuple(_ensure_map(m) for m in maps)
+        self.base_maps.extend(map_list)
         plot_list: list[MapObject] = []
         for mapper in map_list:
             # Expand processors so derived layers (e.g., hillshade) get plotted too.

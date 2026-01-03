@@ -1,5 +1,7 @@
 """Matplotlib style presets for topoviz."""
 
+from __future__ import annotations
+
 
 __all__ = [
     "apply_dark_pres_mono_style",
@@ -7,7 +9,10 @@ __all__ = [
     "apply_paper_style",
     "apply_bw_paper_style",
     "set_style",
+    "get_style",
 ]
+
+_CURRENT_STYLE: "str | None" = None
 
 
 def apply_dark_pres_mono_style() -> None:
@@ -505,14 +510,22 @@ def set_style(style: str) -> None:
         "bw_paper": apply_bw_paper_style,
     }
 
+    global _CURRENT_STYLE
     if normalized in styles:
         styles[normalized]()
+        _CURRENT_STYLE = normalized
         return
 
     builtin_styles = _builtin_style_lookup()
     if normalized in builtin_styles:
         plt.style.use(builtin_styles[normalized])
+        _CURRENT_STYLE = builtin_styles[normalized]
         return
 
     available = ", ".join(sorted(set(styles) | set(builtin_styles)))
     raise ValueError(f"Unknown style '{style}'. Available styles: {available}")
+
+
+def get_style() -> str | None:
+    """Return the last style applied via set_style, if any."""
+    return _CURRENT_STYLE

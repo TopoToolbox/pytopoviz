@@ -128,6 +128,7 @@ class _ProcessorNamespace:
         self.nan_equal = masknan.nan_equal
         self.nan_below = masknan.nan_below
         self.nan_above = masknan.nan_above
+        self.nan_mask = masknan.nan_mask
         self.hillshade = shading2d.hillshade_processor
         self.multishade = shading2d.multishade_processor
         self.gaussian_smooth = filter2d.gaussian_smooth
@@ -136,6 +137,20 @@ class _ProcessorNamespace:
         self.halve_scale = helper3d.halve_scale
         self.tenfold = helper3d.tenfold
         self.tenthfold = helper3d.tenthfold
+        self.lighting_control = helper3d.lighting_control
+        self.matte_lighting = helper3d.matte_lighting
+        self.glossy_lighting = helper3d.glossy_lighting
+        self.flat_lighting = helper3d.flat_lighting
+        self.dramatic_lighting = helper3d.dramatic_lighting
+        self.heightmap_lighting = helper3d.heightmap_lighting
+        self.lighting_intensity_up = helper3d.lighting_intensity_up
+        self.lighting_intensity_down = helper3d.lighting_intensity_down
+        self.lighting_brighten = helper3d.lighting_brighten
+        self.lighting_darken = helper3d.lighting_darken
+        self.light_rotate_left = helper3d.light_rotate_left
+        self.light_rotate_right = helper3d.light_rotate_right
+        self.light_raise = helper3d.light_raise
+        self.light_lower = helper3d.light_lower
 
 
 # Expose a shared namespace instance
