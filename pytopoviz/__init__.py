@@ -46,7 +46,7 @@ from .style2d import (
     set_style,
     get_style,
 )
-from .helper2d import convert_ticks_to_km, add_grid_crosses
+from .helper2d import convert_ticks_to_km, add_grid_crosses, add_colorbar
 from .workflow import Workflow, workflow_from_fig2d, workflow_from_fig3d
 
 __all__ = [

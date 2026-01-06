@@ -14,12 +14,10 @@ from .workflow import Workflow
 
 def _prompt_gui(specs: Dict[str, dict], provided: Dict[str, str], only_loaders: Optional[set[str]] = None) -> Dict[str, str]:
     import tkinter as tk
-    from tkinter import filedialog, simpledialog, messagebox
+    from tkinter import filedialog, messagebox
 
     resolved = dict(provided)
-    root = tk.Tk()
-    root.withdraw()
-
+    prompt_specs: Dict[str, dict] = {}
     for name, spec in specs.items():
         if name in resolved:
             continue
@@ -27,29 +25,93 @@ def _prompt_gui(specs: Dict[str, dict], provided: Dict[str, str], only_loaders: 
             if "default" in spec:
                 resolved[name] = str(spec["default"])
             continue
+        prompt_specs[name] = spec
+
+    root = tk.Tk()
+    root.title("pytopoviz workflow inputs")
+    root.geometry("640x520")
+
+    container = tk.Frame(root)
+    container.pack(fill="both", expand=True)
+
+    canvas = tk.Canvas(container, borderwidth=0)
+    scrollbar = tk.Scrollbar(container, orient="vertical", command=canvas.yview)
+    form = tk.Frame(canvas)
+
+    form.bind(
+        "<Configure>",
+        lambda event: canvas.configure(scrollregion=canvas.bbox("all")),
+    )
+    canvas.create_window((0, 0), window=form, anchor="nw")
+    canvas.configure(yscrollcommand=scrollbar.set)
+
+    canvas.pack(side="left", fill="both", expand=True)
+    scrollbar.pack(side="right", fill="y")
+
+    widgets: Dict[str, Dict[str, object]] = {}
+
+    def browse_path(target_var: tk.StringVar) -> None:
+        selected = filedialog.askopenfilename()
+        if selected:
+            target_var.set(selected)
+
+    row = 0
+    for name, spec in prompt_specs.items():
         input_type = spec.get("type", "str")
         prompt = spec.get("prompt", name)
         default = spec.get("default")
 
-        if input_type == "path":
-            path = filedialog.askopenfilename(title=prompt)
-            if not path:
-                messagebox.showerror("Missing input", f"Missing required path for '{name}'.")
-                raise click.ClickException(f"Missing required path for '{name}'.")
-            resolved[name] = path
-            continue
+        label = tk.Label(form, text=prompt, anchor="w", justify="left", wraplength=420)
+        label.grid(row=row, column=0, sticky="w", padx=8, pady=6)
 
-        value = None
-        while value is None:
+        if input_type == "bool":
+            var = tk.BooleanVar(value=bool(default) if default is not None else False)
+            widget = tk.Checkbutton(form, variable=var)
+            widget.grid(row=row, column=1, sticky="w", padx=8, pady=6)
+            widgets[name] = {"type": "bool", "var": var}
+        else:
+            var = tk.StringVar(value=str(default) if default is not None else "")
+            entry = tk.Entry(form, textvariable=var, width=40)
+            entry.grid(row=row, column=1, sticky="w", padx=8, pady=6)
+            widgets[name] = {"type": input_type, "var": var}
+            if input_type == "path":
+                button = tk.Button(form, text="Browse", command=lambda v=var: browse_path(v))
+                button.grid(row=row, column=2, sticky="w", padx=8, pady=6)
+        row += 1
+
+    result: Dict[str, str] = {}
+
+    def submit() -> None:
+        missing = []
+        for name, info in widgets.items():
+            input_type = info["type"]
+            var = info["var"]
             if input_type == "bool":
-                value = messagebox.askyesno("Input", prompt)
-            else:
-                value = simpledialog.askstring("Input", f"{prompt}", initialvalue=str(default) if default is not None else "")
-            if value is None:
-                messagebox.showerror("Missing input", f"Missing required value for '{name}'.")
-        resolved[name] = value
+                result[name] = str(bool(var.get()))
+                continue
+            value = str(var.get()).strip()
+            if value == "":
+                missing.append(name)
+                continue
+            result[name] = value
+        if missing:
+            messagebox.showerror("Missing input", f"Missing required values for: {', '.join(missing)}.")
+            return
+        root.quit()
 
+    def cancel() -> None:
+        root.destroy()
+        raise click.ClickException("Input cancelled.")
+
+    controls = tk.Frame(root)
+    controls.pack(fill="x")
+    tk.Button(controls, text="Cancel", command=cancel).pack(side="right", padx=8, pady=8)
+    tk.Button(controls, text="Run", command=submit).pack(side="right", padx=8, pady=8)
+
+    root.mainloop()
     root.destroy()
+
+    resolved.update(result)
     return resolved
 
 

@@ -409,6 +409,22 @@ def _build_specs_from_maps(
             "loader": default_loader,
             "params": loader_params,
         }
+        proc_specs: list[Dict[str, Any]] = []
+        for idx, proc in enumerate(mapper.processors):
+            raw_params = _serialize_proc_params(proc)
+            proc_params: Dict[str, Any] = {}
+            for key, val in raw_params.items():
+                input_name = f"{mapper.name}_{proc.name}_{idx}_{key}"
+                default_val = _jsonify(val)
+                inputs[input_name] = {
+                    "type": _infer_input_type(default_val),
+                    "prompt": f"{mapper.name} {proc.name} {key}",
+                    "required": False,
+                    "default": default_val,
+                }
+                proc_params[key] = {"$ref": input_name}
+            proc_specs.append({"name": proc.name, "params": proc_params})
+
         map_specs.append(
             {
                 "name": mapper.name,
@@ -426,10 +442,7 @@ def _build_specs_from_maps(
                 "light_azimuth": mapper.light_azimuth,
                 "light_elevation": mapper.light_elevation,
                 "light_intensity": mapper.light_intensity,
-                "processors": [
-                    {"name": proc.name, "params": _serialize_proc_params(proc)}
-                    for proc in mapper.processors
-                ],
+                "processors": proc_specs,
             }
         )
     return inputs, data_sources, map_specs
@@ -471,8 +484,9 @@ def _serialize_proc_params(proc: Any) -> Dict[str, Any]:
     for key, val in vars(proc).items():
         if key in base_keys:
             continue
-        if _is_jsonable(val):
-            params[key] = val
+        serialized = _jsonify(val)
+        if _is_jsonable(serialized):
+            params[key] = serialized
     return params
 
 
@@ -492,6 +506,19 @@ def _serialize_color(value: Any) -> Any:
     if isinstance(value, (list, tuple)):
         return list(value)
     return value
+
+
+def _infer_input_type(value: Any) -> str:
+    """Infer workflow input type from a default value."""
+    if isinstance(value, bool):
+        return "bool"
+    if isinstance(value, int):
+        return "int"
+    if isinstance(value, float):
+        return "float"
+    if isinstance(value, str):
+        return "str"
+    return "json"
 
 
 def _jsonify(value: Any) -> Any:
