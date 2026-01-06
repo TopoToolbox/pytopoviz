@@ -1,6 +1,8 @@
 # pytopoviz
 
-`pytopoviz` is visualisation framework for crafting/using reproduciple recipes to make 2D and 3D figure from [`pytopotoolbox`](https://github.com/TopoToolbox/pytopotoolbox). 2D figures are built on top of `matplotlib`, 3D on `pyvista`.
+`pytopoviz` is visualisation framework for crafting/using reproduciple recipes to make 2D and 3D figure from [`pytopotoolbox`](https://github.com/TopoToolbox/pytopotoolbox) and associated packages. 2D figures are built on top of `matplotlib`, 3D on `pyvista`.
+
+The software is still in alpha but under heavy development since November 2025.
 
 ## Features
 
@@ -12,8 +14,25 @@
   + conditional nan masking (e.g. removing data below elevation)
   + hillshading, smoothing other filtering
   + WIP
+- exportable/runnable workflows
 - (WIP) per-application recipes (e.g. graphflood, slope, ...)
 - (WIP) topographic analyses processors (e.g. stream network)
+
+## Usage
+
+Two levels of usage:
+
+### python scripts
+
+Create 2D and 3D figures by chaining processor and data. 
+
+```
+TODO
+```
+
+### Export and run Workflows
+
+`Fig2D` amd `Fig3D` can be exported to json workflow and then rerun with different data/params.
 
 ## Processors
 
